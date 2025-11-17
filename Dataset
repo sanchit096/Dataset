@@ -1,0 +1,54 @@
+import pandas as pd
+import numpy as np
+from sklearn.preprocessing import MinMaxScaler
+import matplotlib.pyplot as plt
+
+# -----------------------------
+# 1. LOAD DATASET
+# -----------------------------
+data = {
+    "Student": ["S1","S2","S3","S4","S5","S6","S7"],
+    "Study_Hour": [2,5,1,6,3,4,2],
+    "Attendance": [75,90,60,95,70,73,91],
+    "Sleep_Hour": [6,7,5,8,6,4,6],
+    "Internet_Use": [5,3,6,3,2,4,2],
+    "Result": ["Fail","Pass","Pass","Pass","Fail","Pass","Fail"]
+}
+
+df = pd.DataFrame(data)
+
+# -----------------------------
+# 2. PREPROCESSING
+# -----------------------------
+# Encode categorical result
+df["Result_Encoded"] = df["Result"].map({"Pass":1, "Fail":0})
+
+# Normalize continuous features
+scaler = MinMaxScaler()
+scaled_features = scaler.fit_transform(df[["Study_Hour","Attendance","Sleep_Hour","Internet_Use"]])
+
+df_scaled = pd.DataFrame(
+    scaled_features,
+    columns=["Study_Hour","Attendance","Sleep_Hour","Internet_Use"]
+)
+df_scaled["Result"] = df["Result"]
+
+# -----------------------------
+# 3. GROUPED OUTPUT (for graph)
+# -----------------------------
+grouped = df.groupby("Result")[["Study_Hour","Attendance","Sleep_Hour","Internet_Use"]].mean()
+
+# -----------------------------
+# 4. GRAPH GENERATION (FIXED)
+# -----------------------------
+plt.figure(figsize=(10,6))
+
+ax = grouped.plot(kind="bar", figsize=(10,6))
+ax.set_title("Comparison of Average Study Factors for Pass vs Fail Students")
+ax.set_xlabel("Result")
+ax.set_ylabel("Average Values")
+ax.legend(title="Factors")
+
+plt.tight_layout()
+plt.savefig("combined_graph.png")
+plt.show()
